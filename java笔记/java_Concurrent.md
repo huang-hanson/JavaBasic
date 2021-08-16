@@ -413,4 +413,84 @@ DiscardPolicy : 不处理，直接丢弃
     }
 ```
 
-8/14
+
+
+
+
+### java中的锁
+
+#### 乐观锁
+
+乐观锁采用乐观的思想处理数据，在每次读取数据时都认为别人不会修改该数据，所以不会上锁。
+
+#### 悲观锁
+
+乐观锁采用悲观的思想处理数据，在每次读取数据时都认为别人会修改该数据，所以在每次读取数据时候会上锁。
+
+### synchronized
+
+```java
+public class SynchronizedDemo {
+    public static void main(String[] args) {
+        SynchronizedDemo synchronizedDemo = new SynchronizedDemo();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                synchronizedDemo.generalMethod1();
+            }
+        }).start();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                synchronizedDemo.generalMethod2();
+            }
+        }).start();
+    }
+    //synchronized修饰普通的同步方法，锁住当前的实例对象
+    public synchronized void generalMethod1() {
+        try {
+            for (int i = 1; i < 3; i++) {
+                System.out.println("generalMethod1 execute "+i+" time");
+                Thread.sleep(3000);
+            }
+
+        }catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //synchronized修饰普通的同步方法，锁住当前的实例对象
+    public synchronized void generalMethod2() {
+        try {
+            for (int i = 1; i < 3; i++) {
+                System.out.println("generalMethod2 execute " + i + " time");
+                Thread.sleep(3000);
+            }
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+```
+
+上面定义了两个使用synchronized修饰的普通方法，然后在main函数中定义对象的实例并发的执行各个方法。我们看到，线程1会等待线程2执行完成才能执行，这是因为synchronized锁住了当前的实例对象synchronezedDemo导致的。
+
+```java
+final SynchronizedDemo synchronizedDemo1 = new SynchronizedDemo();
+final SynchronizedDemo synchronizedDemo2 = new SynchronizedDemo();
+new Thread(new Runnable() {
+    @Override
+    public void run() {
+        synchronizedDemo1.generalMethod1();
+    }
+}).start();
+new Thread(new Runnable() {
+    @Override
+    public void run() {
+        synchronizedDemo2.generalMethod2();
+    }
+}).start();
+```
+
+稍微把程序改一下，定义两个实例分别调用两个方法，程序就会并发的执行起来了。
+
