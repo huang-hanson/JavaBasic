@@ -10,6 +10,7 @@ public class InterruptiblyLock {
     public ReentrantLock lock2 = new ReentrantLock();//step2：第二把锁lock2
     public Thread lock1(){
         Thread t = new Thread(new Runnable() {
+            @Override
             public void run() {
                 try {
                     lock1.lockInterruptibly();//step3.1:如果当前线程未被终端，则获取锁
@@ -39,6 +40,7 @@ public class InterruptiblyLock {
     }
     public Thread lock2(){
         Thread t = new Thread(new Runnable() {
+            @Override
             public void run() {
                 try {
                     lock2.lockInterruptibly();//step3.1:如果当前线程未被终端，则获取锁
