@@ -494,3 +494,310 @@ new Thread(new Runnable() {
 
 稍微把程序改一下，定义两个实例分别调用两个方法，程序就会并发的执行起来了。
 
+```java
+    final SynchronizedStaticDemo synchronizedStaticDemo = new SynchronizedStaticDemo();
+    final SynchronizedStaticDemo synchronizedStaticDemo2 = new SynchronizedStaticDemo();
+    new Thread(new Runnable() {
+        @Override
+        public void run() {
+            synchronizedStaticDemo.generalMethod1();
+        }
+    }).start();
+    new Thread(new Runnable() {
+        @Override
+        public void run() {
+            synchronizedStaticDemo2.generalMethod2();
+        }
+    }).start();
+}
+//synchronized静态同步方法，锁住的是当前类的class对象
+public static synchronized  void generalMethod1() {
+    try {
+        for (int i = 1; i < 3; i++) {
+            System.out.println("generalMethod1 execute "+i+" time");
+            Thread.sleep(3000);
+        }
+    }catch (InterruptedException e) {
+        e.printStackTrace();
+    }
+}
+
+//synchronized静态同步方法，锁住的是当前类的class对象
+public static synchronized  void generalMethod2() {
+    try {
+        for (int i = 1; i < 3; i++) {
+            System.out.println("generalMethod2 execute "+i+" time");
+            Thread.sleep(3000);
+        }
+    }catch (InterruptedException e) {
+        e.printStackTrace();
+    }
+}
+```
+
+因为static方法是属于Class的，并且class的相关数据会在JVM中是共享的，因此静态方法锁相当于一个全局锁，会锁住所有调用该方法的线程。
+
+
+
+#### synchronized作用于代码块时
+
+```java
+public class SynchronizedBlockDemo {
+    String lockA = "lockA";
+    public static void main(String[] args) {
+        SynchronizedBlockDemo synchronizedBlockDemo = new SynchronizedBlockDemo();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                synchronizedBlockDemo.blockMethod1();
+            }
+        }).start();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                synchronizedBlockDemo.blockMethod2();
+            }
+        }).start();
+    }
+    //synchronized用于方法块，锁住的是在括号里面配置的对象
+    public void blockMethod1() {
+        try {
+            synchronized (lockA){
+                for (int i = 1; i < 3; i++) {
+                    System.out.println("Method 1 execute");
+                    Thread.sleep(3000);
+                }
+            }
+        }catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+    //synchronized用于方法块，锁住的是在括号里面配置的对象
+    public void blockMethod2() {
+        try {
+            synchronized (lockA){
+                for (int i = 1; i < 3; i++) {
+                    System.out.println("Method 2 execute");
+                    Thread.sleep(3000);
+                }
+            }
+        }catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+```
+
+以上代码块运行结果很简单，由于获取两个方法都需要获取名为lockA的锁，所以线程1会等待线程2执行完成后才能获取该锁并执行。
+
+#### 死锁
+
+```java
+String lockA = "lockA";
+String lockB = "lockB";
+public static void main(String[] args) {
+    final SynchronizedDeadlockDemo synchronizedDeadlockDemo = new SynchronizedDeadlockDemo();
+    new Thread(new Runnable() {
+        @Override
+        public void run() {
+            synchronizedDeadlockDemo.blockMethod1();
+        }
+    }).start();
+    new Thread(new Runnable() {
+        @Override
+        public void run() {
+            synchronizedDeadlockDemo.blockMethod2();
+        }
+    }).start();
+}
+//synchronized用于同步方法块，锁住的是在括号里面配置的对象
+public void blockMethod1() {
+    try {
+        synchronized (lockA){
+            for (int i = 1; i < 3; i++) {
+                System.out.println("Method 1 execute");
+                Thread.sleep(3000);
+                synchronized (lockB){}
+            }
+        }
+    }catch (InterruptedException e) {
+        e.printStackTrace();
+    }
+}
+//synchronized用于同步方法块，锁住的是在括号里面配置的对象
+public void blockMethod2() {
+    try {
+        synchronized (lockB){
+            for (int i = 1; i < 3; i++) {
+                System.out.println("Method 2 execute");
+                Thread.sleep(3000);
+                synchronized (lockA) {}
+            }
+        }
+    }catch (InterruptedException e) {
+        e.printStackTrace();
+    }
+}
+```
+
+通过上述代码可以看出，在blockMethod1方法中，synchronized(lockA)在第一次循环以后使用synchronized(lockB)锁住了lockB，下一次执行等待lockA锁释放以后才能继续；而在blockMethod2方法中，synchronized(lockB)在第一次循环后使用synchronized(lockA)锁住了lockA，等待lockB释放以后才能进行下一次操作。这样就出现了block Mthod1等待blockMethod2释放lockA，而blockMehtod2等待blockMethod1释放lockB的情况，就出现了死锁。
+
+### synchronized的实现原理
+
+ContentionList：锁竞争队列，所有请求锁的线程都被存放在竞争队列当中。
+
+EntryList：竞争候选列表，在Contention List中有资格成为候选人来竞争锁资源的线程被移动到EntryList中。
+
+WaitSet：等待集合，调用wait方法后被阻塞的线程将被放在WaitSet中。
+
+OnDeck：竞争候选者，在同一时候最多只有一个线程在竞争资源锁，该线程状态被称为OnDeck。
+
+Owner：竞争到锁资源的线程被称为Owner状态线程。
+
+!Owner:在Owner线程被释放锁后，会从Owner的状态变成！Owner。
+
+### ReentrantLock用法
+
+```java
+public class ReentrantLockDemo implements Runnable {
+
+    //step1:定义一个ReentrantLock
+    public static ReentrantLock lock = new ReentrantLock();
+    public static int i = 0;
+
+    @Override
+    public void run() {
+        for (int j = 0; j < 10; j++) {
+            lock.lock();//step2：加锁
+            //lock.lock();//可重入锁
+            try {
+                i++;
+            }finally {
+                lock.unlock();//step3:释放锁
+                //lock.unlock();//可重入锁
+            }
+        }
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        ReentrantLockDemo reentrantLock = new ReentrantLockDemo();
+        Thread t1 = new Thread(reentrantLock);
+        t1.start();
+        t1.join();
+        System.out.println(i);
+    }
+}
+```
+
+ReentrantLock之所以被称为可重入锁，是因为ReentrantLock锁可以可以反复进入。即允许连续两次的获得同一把锁，两次同时释放同一把锁。将注释部分去掉，任然可以正常运行。获取和释放锁的数量要相同，如果释放锁的次数大于获取锁的次数，则java就会抛出java.lang.IllegalMonitorStat异常；如果释放锁的次数小于获取锁的次数，那么该线程就会一直持有该锁，其他线程将无法获取锁资源。
+
+#### ReentrantLock如何避免死锁：响应中断、可轮询锁、定时锁
+
+```java
+public class InterruptiblyLock {
+    public ReentrantLock lock1 = new ReentrantLock();//step1：第一把锁lock1
+    public ReentrantLock lock2 = new ReentrantLock();//step2：第二把锁lock2
+    public Thread lock1(){
+        Thread t = new Thread(new Runnable() {
+            public void run() {
+                try {
+                    lock1.lockInterruptibly();//step3.1:如果当前线程未被终端，则获取锁
+                    try {
+                        Thread.sleep(500);//step3.2：sleep 500ms，这里执行具体的业务逻辑
+                    }catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    lock2.lockInterruptibly();
+                    System.out.println(Thread.currentThread().getName() + "执行完毕！");
+                }catch (InterruptedException e) {
+                    e.printStackTrace();
+                }finally {
+                    //step5.1:在业务逻辑执行以后，检查当前线程是否有该锁，如果持有锁则释放该锁
+                    if(lock1.isHeldByCurrentThread()){
+                        lock1.unlock();
+                    }
+                    if (lock2.isHeldByCurrentThread()){
+                        lock2.unlock();
+                    }
+                    System.out.println(Thread.currentThread().getName() + "退出。");
+                }
+            }
+        });
+        t.start();
+        return t;
+    }
+    public Thread lock2(){
+        Thread t = new Thread(new Runnable() {
+            public void run() {
+                try {
+                    lock2.lockInterruptibly();//step3.1:如果当前线程未被终端，则获取锁
+                    try {
+                        Thread.sleep(500);//step3.2：sleep 500ms，这里执行具体的业务逻辑
+                    }catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    lock1.lockInterruptibly();
+                    System.out.println(Thread.currentThread().getName() + "执行完毕！");
+                }catch (InterruptedException e) {
+                    e.printStackTrace();
+                }finally {
+                    //step5.1:在业务逻辑执行以后，检查当前线程是否有该锁，如果持有锁则释放该锁
+                    if(lock1.isHeldByCurrentThread()){
+                        lock1.unlock();
+                    }
+                    if (lock2.isHeldByCurrentThread()){
+                        lock2.unlock();
+                    }
+                    System.out.println(Thread.currentThread().getName() + "退出。");
+                }
+            }
+        });
+        t.start();
+        return t;
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        long time = System.currentTimeMillis();
+        InterruptiblyLock interruptiblyLock = new InterruptiblyLock();
+        Thread thread1 = interruptiblyLock.lock1();
+        Thread thread2 = interruptiblyLock.lock2();
+        //自旋一段时间，如果等待时间过长，则可能发生了死锁等问题，主动中断并释放锁
+        while(true){
+            if (System.currentTimeMillis() - time >= 3000){
+                thread2.interrupt();//中断线程1
+            }
+        }
+    }
+}
+```
+
+在以上代码当中，在线程Thread1和Thread2启动以后，thread1先占用着lock1，在占用lock2；thread2则先占用lock2，后占用lock1，这边形成了thread1和thread2之间的相互等待，在两个线程都启动时便处于死锁状态。在while循环中，如果等待时间过长，则这里设定为3秒，如果可能发生死锁状态，thread2就会主动中断(interrupt)，释放对lock1的申请，同时释放已获得的lock2，让thread1顺利获得lock2，继续执行下去。
+
+### AtomicInteger
+
+```java
+class AtomicIntegerDemo implements Runnable{
+
+    //step1:定义一个原子操作数
+    static AtomicInteger safeCounter = new AtomicInteger(0);
+    @Override
+    public void run() {
+        for (int m = 0; m < 1000000; m++) {
+            safeCounter.getAndIncrement();//step2:对原子操作数执行自增操作
+        }
+    }
+}
+
+class AtomicIntegerDemoTest{
+    public static void main(String[] args) throws InterruptedException{
+        AtomicIntegerDemo mt = new AtomicIntegerDemo();
+        Thread t1 = new Thread(mt);
+        Thread t2 = new Thread(mt);
+        t1.start();
+        t2.start();
+        Thread.sleep(500);
+        System.out.println(mt.safeCounter.get());
+
+    }
+}
+```
+
