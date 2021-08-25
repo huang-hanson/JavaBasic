@@ -8,5 +8,4 @@ public class Bitmap {
     private byte[] bytes;
     //length为位图的长度，实际可操作的下表为[0,length)
     private int length;
-
 }
