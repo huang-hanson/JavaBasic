@@ -1,7 +1,7 @@
 package com.hanson.Algorithm;
 
 
-public class HeapSort extends Sort<Comparable<T>> {
+public class HeapSort extends Sort {
     private int heapSize;
 
     @Override
