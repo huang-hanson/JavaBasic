@@ -69,15 +69,4 @@ public abstract class Sort<T extends Comparable<T>> {
         if (number < 100000000) {return fmt.format(number / 10000.0) + "万";}
         return fmt.format(number / 100000000.0) + "亿";
     }
-
-    @Override
-    public int compareTo(Sort<T> o) {
-        int result = (int)(time - o.time);
-        if (result != 0) {return result;}
-
-        result = cmpCount - o.cmpCount;
-        if (result != 0) {return result;}
-
-        return swapCount - o.swapCount;
-    }
 }
