@@ -3,10 +3,12 @@ package com.hanson.ali;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.concurrent.TimeUnit;
 
 public class Test {
 
     public static void main(String[] args) {
+/*
         ArrayList arrayList = new ArrayList();
         arrayList.get(1);//查询
         arrayList.add(1);//扩容
@@ -21,6 +23,39 @@ public class Test {
 
 
         HashMap hashMap = new HashMap();
-        hashMap.put();
+        hashMap.put(1,1);
+*/
+
+        //ThreadLocal
+        Person person = new Person();
+
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                person.setName("Hanson");
+                try {
+                    TimeUnit.SECONDS.sleep(3);
+                }catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("线程1==="+person.getName());
+            }
+        }).start();
+
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                person.setName("HuangZhong");
+                try {
+                    TimeUnit.SECONDS.sleep(3);
+                }catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("线程2==="+person.getName());
+            }
+        }).start();
+
     }
 }
