@@ -1,9 +1,6 @@
 package com.hanson.ali.LoadBalance;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ServerIps {
     public static final List<String> LIST = Arrays.asList(
@@ -20,7 +17,12 @@ public class ServerIps {
             );
 
     public static final Map<String, Integer> WEIGHT_LIST = new HashMap<String, Integer>();
-    static {
+    static     {
+        WEIGHT_LIST.put("A", 5);
+        WEIGHT_LIST.put("B", 1);
+        WEIGHT_LIST.put("C", 1);
+    }
+        /*{
         // 权重之和为50
         WEIGHT_LIST.put("192.168.0.1", 1);
         WEIGHT_LIST.put("192.168.0.2", 8);
@@ -32,5 +34,20 @@ public class ServerIps {
         WEIGHT_LIST.put("192.168.0.8", 7);
         WEIGHT_LIST.put("192.168.0.9", 2);
         WEIGHT_LIST.put("192.168.0.10", 9);
+    }*/
+
+    // 服务器当前的活跃数
+    public static final Map<String, Integer> ACTIVITY_LIST = new LinkedHashMap<String, Integer>();
+    static {
+        ACTIVITY_LIST.put("192.168.0.1", 2);
+        ACTIVITY_LIST.put("192.168.0.2", 0);
+        ACTIVITY_LIST.put("192.168.0.3", 1);
+        ACTIVITY_LIST.put("192.168.0.4", 3);
+        ACTIVITY_LIST.put("192.168.0.5", 0);
+        ACTIVITY_LIST.put("192.168.0.6", 1);
+        ACTIVITY_LIST.put("192.168.0.7", 4);
+        ACTIVITY_LIST.put("192.168.0.8", 2);
+        ACTIVITY_LIST.put("192.168.0.9", 7);
+        ACTIVITY_LIST.put("192.168.0.10", 3);
     }
 }

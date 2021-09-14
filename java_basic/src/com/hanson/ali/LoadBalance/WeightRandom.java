@@ -2,7 +2,10 @@ package com.hanson.ali.LoadBalance;
 
 import java.util.ArrayList;
 import java.util.List;
-
+/*
+loadbalance负载均衡
+权重随机算法
+* */
 public class WeightRandom {
     public static String getServer() {
         // 生成一个随机数作为list的下标值
