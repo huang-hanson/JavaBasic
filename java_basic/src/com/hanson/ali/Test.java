@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 
 public class Test {
 
@@ -56,6 +57,7 @@ public class Test {
                 System.out.println("线程2==="+person.getName());
             }
         }).start();
+
 
     }
 }
