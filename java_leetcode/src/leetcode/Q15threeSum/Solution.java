@@ -37,7 +37,7 @@ public class Solution {
             if (nums[i] > 0 ) {
                 break;// 第一个数大于 0，后面的数都比它大，肯定不成立了
             }
-            if (i > 0 && nums[i] == nums[i-1]){
+            if (i >            0 && nums[i] == nums[i-1]){
                 continue;// 去掉重复情况
             }
             int target = -nums[i];
