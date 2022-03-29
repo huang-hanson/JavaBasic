@@ -8,6 +8,7 @@
       <module fileurl="file://$PROJECT_DIR$/hanson-web/hanson-web.iml" filepath="$PROJECT_DIR$/hanson-web/hanson-web.iml" />
       <module fileurl="file://$PROJECT_DIR$/java_basic/java_basic.iml" filepath="$PROJECT_DIR$/java_basic/java_basic.iml" />
       <module fileurl="file://$PROJECT_DIR$/java_leetcode/java_leetcode.iml" filepath="$PROJECT_DIR$/java_leetcode/java_leetcode.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java_niuke/java_niuke.iml" filepath="$PROJECT_DIR$/java_niuke/java_niuke.iml" />
     </modules>
   </component>
 </project>

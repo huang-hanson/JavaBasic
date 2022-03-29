@@ -27,7 +27,8 @@ public class HttpServerHandler {
 
             String result = (String) method.invoke(clazz.newInstance(), invocation.getParams());
 
-            IOUtils.write(result,resp.getOutputStream());
+            //IOUtils.write(result,resp.getOutputStream());
+
 
 
         } catch (IOException e) {
